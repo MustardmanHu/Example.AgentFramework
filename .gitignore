@@ -6,8 +6,8 @@ obj/
 *.sln.docstates
 
 # App Settings (Sensitive)
-# appsettings.json
-# AppSettings.json
+appsettings.json
+AppSettings.json
 
 # Generated Code & Logs
 _GeneratedCode/
