@@ -1,3 +1,5 @@
+using MyAgentTeam.Infrastructure.Services;
+
 namespace MyAgentTeam.ConsoleHost
 {
     /// <summary>
@@ -35,6 +37,19 @@ namespace MyAgentTeam.ConsoleHost
                         inputPath = inputPath.Substring(1, inputPath.Length - 2);
                     }
 
+                    if (string.IsNullOrWhiteSpace(inputPath))
+                    {
+                        continue;
+                    }
+
+                    if (!PathValidator.IsSafePath(inputPath))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"[Security Error]: 此路徑被視為不安全或受限制 (e.g. System Directory or Root)。請輸入其他路徑。");
+                        Console.ResetColor();
+                        continue;
+                    }
+
                     if (Directory.Exists(inputPath))
                     {
                         projectPath = inputPath;
@@ -44,7 +59,7 @@ namespace MyAgentTeam.ConsoleHost
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"[Error]: 找不到目錄 '{{inputPath}}'，請重新輸入。");
+                        Console.WriteLine($"[Error]: 找不到目錄 '{inputPath}'，請重新輸入。");
                         Console.ResetColor();
                     }
                 }
@@ -55,9 +70,22 @@ namespace MyAgentTeam.ConsoleHost
                 isNew = true;
                 Console.Write("請輸入新專案名稱 (Project Name): ");
                 string projectName = Console.ReadLine()?.Trim() ?? "";
+
+                if (!string.IsNullOrWhiteSpace(projectName))
+                {
+                    // Basic sanitization: remove invalid chars
+                    char[] invalidChars = Path.GetInvalidFileNameChars();
+                    if (projectName.IndexOfAny(invalidChars) >= 0 || projectName.Contains(".."))
+                    {
+                        Console.WriteLine("[System]: 專案名稱包含無效字元，已自動移除。");
+                        projectName = string.Concat(projectName.Split(invalidChars));
+                        projectName = projectName.Replace("..", "");
+                    }
+                }
+
                 if (string.IsNullOrWhiteSpace(projectName))
                 {
-                    projectName = $"Project_{{DateTime.Now:yyyyMMdd_HHmmss}}";
+                    projectName = $"Project_{DateTime.Now:yyyyMMdd_HHmmss}";
                     Console.WriteLine($"[System]: 自動產生專案名稱: {projectName}");
                 }
 

@@ -8,6 +8,7 @@ internal class Program
 {
     private static readonly string apiKey = Environment.GetEnvironmentVariable("GOOGLE_API_KEY") ??
         throw new InvalidOperationException("API Key not found. Please set the GOOGLE_API_KEY environment variable.");
+
     private static void Main(string[] args)
     {
         var client = new GenerativeAIChatClient(apiKey: apiKey, modelName: GoogleAIModels.GeminiProLatest);

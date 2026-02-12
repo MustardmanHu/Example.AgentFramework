@@ -50,9 +50,7 @@ public class RateLimitRetryHandler : DelegatingHandler
             var retryAfter = response.Headers.RetryAfter?.Delta;
             var delay = retryAfter ?? FixedDelay;
 
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"[System Warning]: Hit Rate Limit (429). Waiting {delay.TotalSeconds}s before retry ({i}/{MaxAttempts - 1})...");
-            Console.ResetColor();
+            await Console.Out.WriteLineAsync($"[System Warning]: Hit Rate Limit (429). Waiting {delay.TotalSeconds}s before retry ({i}/{MaxAttempts - 1})...").ConfigureAwait(false);
 
             // 等待
             await Task.Delay(delay, cancellationToken);
