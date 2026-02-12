@@ -44,8 +44,6 @@ public static class ServiceCollectionExtensions
             }
         }
 
-        var builder = Kernel.CreateBuilder();
-
         // 2. 設定 HttpClient (包含重試機制)
         // ---------------------------------------------------------
 
@@ -65,28 +63,33 @@ public static class ServiceCollectionExtensions
         };
         // ---------------------------------------------------------
 
-        // 3. 建立 Gemini Chat Completion Service
+        // 5. 建立Kernel
+        services.AddTransient<Kernel>(sp =>
+        {
+            var builder = Kernel.CreateBuilder();
+
+            // 3. 建立 Gemini Chat Completion Service
 #pragma warning disable SKEXP0070 
-        builder.AddGoogleAIGeminiChatCompletion(
-            modelId: modelId,
-            apiKey: geminiApiKey,
-            httpClient: robustClient
-        );
+            builder.AddGoogleAIGeminiChatCompletion(
+                modelId: modelId,
+                apiKey: geminiApiKey,
+                httpClient: robustClient
+            );
 #pragma warning restore SKEXP0070 
 
-        // 4. Add Plugins
-        // Add ResearchPlugin
-        var researchPlugin = new ResearchPlugin(googleSearchApiKey, googleSearchEngineId, robustClient);
-        builder.Plugins.AddFromObject(researchPlugin, "research");
+            // 4. Add Plugins
+            // Add ResearchPlugin
+            var researchPlugin = new ResearchPlugin(googleSearchApiKey, googleSearchEngineId, robustClient);
+            builder.Plugins.AddFromObject(researchPlugin, "research");
 
-        // Add FileSystemPlugin 
-        builder.Plugins.AddFromObject(new FileSystemPlugin(projectPath), "file_system");
+            // Add FileSystemPlugin
+            builder.Plugins.AddFromObject(new FileSystemPlugin(projectPath), "file_system");
 
-        // Add ShellPlugin 
-        builder.Plugins.AddFromObject(new ShellPlugin(projectPath), "shell");
+            // Add ShellPlugin
+            builder.Plugins.AddFromObject(new ShellPlugin(projectPath), "shell");
 
-        // 5. 建立Kernel
-        services.AddTransient<Kernel>(sp => builder.Build());
+            return builder.Build();
+        });
 
         // 6. Add Orchestrator
         services.AddTransient<IAgentOrchestrator, AgentOrchestrator>();
