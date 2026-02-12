@@ -6,7 +6,7 @@ using Microsoft.Agents.AI;
 
 internal class Program
 {
-    private static readonly string apiKey = "AIzaSyDcnGw_yxuu07tZqvxgGmTEvIFs0Y3sVuY";
+    private static readonly string apiKey = Environment.GetEnvironmentVariable("GOOGLE_API_KEY") ?? "YOUR_API_KEY";
     private static void Main(string[] args)
     {
         var client = new GenerativeAIChatClient(apiKey: apiKey, modelName: GoogleAIModels.GeminiProLatest);
