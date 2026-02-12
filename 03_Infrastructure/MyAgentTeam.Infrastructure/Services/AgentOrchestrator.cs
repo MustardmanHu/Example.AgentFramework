@@ -464,6 +464,11 @@ public partial class AgentOrchestrator(Kernel kernel) : IAgentOrchestrator
                 return Task.FromResult(true);
             }
 
+            if (System.Text.RegularExpressions.Regex.IsMatch(content, @"\[HANDOFF TO\s+.*?\]", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            {
+                return Task.FromResult(true);
+            }
+
             return Task.FromResult(false);
         }
     }
