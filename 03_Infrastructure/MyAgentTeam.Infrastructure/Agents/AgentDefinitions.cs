@@ -53,7 +53,7 @@ public static class AgentDefinitions
     });
 #pragma warning restore SKEXP0110
 
-    public static ChatCompletionAgent CreateSupervisor(Kernel kernel, string sharedInstructions, bool isNewProject)
+    public static ChatCompletionAgent CreateSupervisor(Kernel kernel, string sharedInstructions)
     {
         string name = "Supervisor";
         string instructions = @"你是既有專案的維護經理 (Supervisor)。
@@ -87,7 +87,7 @@ public static class AgentDefinitions
     
         return new ChatCompletionAgent { Name = name, Instructions = AppendShared(instructions, sharedInstructions, name), Kernel = kernel, Arguments = CreateDefaultArguments() };
     }
-    public static ChatCompletionAgent CreateDesigner(Kernel kernel, string sharedInstructions, bool isNewProject)
+    public static ChatCompletionAgent CreateDesigner(Kernel kernel, string sharedInstructions)
     {
         string name = "System_Designer";
         string instructions = @"你是架構規劃師 (Architect)。
@@ -116,7 +116,7 @@ public static class AgentDefinitions
         return new ChatCompletionAgent { Name = name, Instructions = AppendShared(instructions, sharedInstructions, name), Kernel = kernel, Arguments = CreateDefaultArguments() };
     }
 
-    public static ChatCompletionAgent CreateProgrammer(Kernel kernel, string sharedInstructions, bool isNewProject)
+    public static ChatCompletionAgent CreateProgrammer(Kernel kernel, string sharedInstructions)
     {
         string name = "Programmer";
         string instructions = @"你是資深開發者 (Programmer)。
@@ -159,7 +159,7 @@ public static class AgentDefinitions
         return new ChatCompletionAgent { Name = name, Instructions = AppendShared(instructions, sharedInstructions, name), Kernel = kernel, Arguments = CreateDefaultArguments() };
     }
 
-    public static ChatCompletionAgent CreateDBA(Kernel kernel, string sharedInstructions, bool isNewProject)
+    public static ChatCompletionAgent CreateDBA(Kernel kernel, string sharedInstructions)
     {
         string name = "DBA";
         string instructions = @"你是資料庫管理員 (DBA)。
@@ -184,7 +184,7 @@ public static class AgentDefinitions
         return new ChatCompletionAgent { Name = name, Instructions = AppendShared(instructions, sharedInstructions, name), Kernel = kernel, Arguments = CreateDefaultArguments() };
     }
 
-    public static ChatCompletionAgent CreateProgrammerSecond(Kernel kernel, string sharedInstructions, bool isNewProject)
+    public static ChatCompletionAgent CreateProgrammerSecond(Kernel kernel, string sharedInstructions)
     {
         string name = "Second_Programmer";
         string instructions = @"你是資深除錯專家 (Debugger / Second Programmer)。
@@ -206,14 +206,14 @@ public static class AgentDefinitions
         return new ChatCompletionAgent { Name = name, Instructions = AppendShared(instructions, sharedInstructions, name), Kernel = kernel, Arguments = CreateDefaultArguments() };
     }
 
-    public static ChatCompletionAgent CreateResearcher(Kernel kernel, string sharedInstructions, bool isNewProject)
+    public static ChatCompletionAgent CreateResearcher(Kernel kernel, string sharedInstructions)
     {
         string name = "Researcher";
         string instructions = @"技術顧問。";
         return new ChatCompletionAgent { Name = name, Instructions = AppendShared(instructions, sharedInstructions, name), Kernel = kernel, Arguments = CreateDefaultArguments() };
     }
 
-    public static ChatCompletionAgent CreateTester(Kernel kernel, string sharedInstructions, bool isNewProject)
+    public static ChatCompletionAgent CreateTester(Kernel kernel, string sharedInstructions)
     {
         string name = "Tester";
         string instructions = @"你是測試工程師 (Tester)。
@@ -236,7 +236,7 @@ public static class AgentDefinitions
         return new ChatCompletionAgent { Name = name, Instructions = AppendShared(instructions, sharedInstructions, name), Kernel = kernel, Arguments = CreateDefaultArguments() };
     }
 
-    public static ChatCompletionAgent CreateQA(Kernel kernel, string sharedInstructions, bool isNewProject)
+    public static ChatCompletionAgent CreateQA(Kernel kernel, string sharedInstructions)
     {
         string name = "QA";
         string instructions = @"你是品質保證專家 (QA)。
