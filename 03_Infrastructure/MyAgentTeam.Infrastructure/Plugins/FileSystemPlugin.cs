@@ -44,7 +44,11 @@ public class FileSystemPlugin
             string fullPath = Path.GetFullPath(Path.Combine(_rootPath, relativePath));
 
             // 防止 Path Traversal 攻擊 (例如: ../../Windows/System32/...)
-            if (!fullPath.StartsWith(_rootPath, StringComparison.OrdinalIgnoreCase))
+            string rootPathWithSeparator = _rootPath.EndsWith(Path.DirectorySeparatorChar.ToString())
+                ? _rootPath
+                : _rootPath + Path.DirectorySeparatorChar;
+
+            if (!fullPath.StartsWith(rootPathWithSeparator, StringComparison.OrdinalIgnoreCase))
             {
                 return $"Error: Access Denied. You can only write files within {_rootPath}.";
             }
@@ -86,7 +90,11 @@ public class FileSystemPlugin
             string fullPath = Path.GetFullPath(Path.Combine(_rootPath, relativePath));
 
             // 安全性檢查
-            if (!fullPath.StartsWith(_rootPath, StringComparison.OrdinalIgnoreCase))
+            string rootPathWithSeparator = _rootPath.EndsWith(Path.DirectorySeparatorChar.ToString())
+                ? _rootPath
+                : _rootPath + Path.DirectorySeparatorChar;
+
+            if (!fullPath.StartsWith(rootPathWithSeparator, StringComparison.OrdinalIgnoreCase))
             {
                 return "Error: Access Denied.";
             }
