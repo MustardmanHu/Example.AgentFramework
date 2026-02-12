@@ -26,7 +26,7 @@ public class ShellPlugin
     /// <param name="command">要執行的指令。</param>
     /// <returns>指令執行結果 (包含 stdout, stderr 和 Exit Code)。</returns>
     [KernelFunction, Description("執行 Shell 指令 (如 dotnet build)")]
-    public string RunShellCommand(
+    public async Task<string> RunShellCommand(
         [Description("要執行的指令")] string command)
     {
         try
@@ -58,17 +58,33 @@ public class ShellPlugin
             using var process = new Process { StartInfo = processInfo };
             process.Start();
 
-            // 避免 Deadlock: 先讀取串流，再等待結束
-            string output = process.StandardOutput.ReadToEnd();
-            string error = process.StandardError.ReadToEnd();
-            
-            bool exited = process.WaitForExit(60000); // 延長至 60 秒，編譯可能較久
+            // 使用 Task.WhenAll 平行讀取 stdout 和 stderr 以避免 Deadlock
+            var outputTask = process.StandardOutput.ReadToEndAsync();
+            var errorTask = process.StandardError.ReadToEndAsync();
 
-            if (!exited)
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60)); // 延長至 60 秒，編譯可能較久
+                await process.WaitForExitAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
             {
                 process.Kill();
-                return $"Error: Process timed out (60s).\nOutput so far:\n{output}";
+                string outputSoFar = string.Empty;
+                try
+                {
+                    // 嘗試讀取已有的輸出
+                    outputSoFar = await outputTask.WaitAsync(TimeSpan.FromMilliseconds(500));
+                }
+                catch
+                {
+                    // 忽略讀取失敗
+                }
+                return $"Error: Process timed out (60s).\nOutput so far:\n{outputSoFar}";
             }
+
+            string output = await outputTask;
+            string error = await errorTask;
 
             // 組合最終結果，強制附上 Exit Code
             string result = $"\n=== COMMAND OUTPUT ===\n{output}\n{error}\n\n[Exit Code]: {process.ExitCode}";

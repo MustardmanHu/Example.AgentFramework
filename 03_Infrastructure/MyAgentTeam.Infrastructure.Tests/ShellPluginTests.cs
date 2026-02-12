@@ -29,10 +29,10 @@ public class ShellPluginTests
     }
 
     [TestMethod]
-    public void RunShellCommand_LegitimateCommand_ReturnsOutput()
+    public async Task RunShellCommand_LegitimateCommand_ReturnsOutput()
     {
         // Act
-        var result = _plugin.RunShellCommand("dotnet --version");
+        var result = await _plugin.RunShellCommand("dotnet --version");
 
         // Assert
         Assert.IsTrue(result.Contains("10.0") || result.Contains("9.0") || result.Contains("8.0") || result.Contains("7.0") || result.Contains("6.0") || result.Contains("5.0"), $"Result was: {result}");
@@ -40,7 +40,7 @@ public class ShellPluginTests
     }
 
     [TestMethod]
-    public void RunShellCommand_CommandInjection_ShouldFailAfterFix()
+    public async Task RunShellCommand_CommandInjection_ShouldFailAfterFix()
     {
         // This test demonstrates the vulnerability. Before fix, it creates the file. After fix, it should not.
 
@@ -48,7 +48,7 @@ public class ShellPluginTests
         string command = $"dotnet --version; echo hacked > {injectedFile}";
 
         // Act
-        var result = _plugin.RunShellCommand(command);
+        var result = await _plugin.RunShellCommand(command);
 
         // Check if file created in working directory
         string filePath = Path.Combine(_testDir, injectedFile);
