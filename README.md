@@ -1,75 +1,148 @@
 # AI Agent Team (Multi-Layer Architecture)
 
-這是一個基於 **.NET 10** 與 **Microsoft Semantic Kernel** 的多代理人 (Multi-Agent) 協作系統。系統採用 Google Gemini 2.5 Pro 模型，模擬了一個完整的軟體開發團隊，能夠自動化執行從需求分析、架構設計、資料庫建模、程式碼撰寫、**單元測試撰寫**到**編譯與測試驗證**的全流程任務。
+這是一個基於 **.NET 10** 與 **Microsoft Semantic Kernel** 的多代理人 (Multi-Agent) 協作系統。系統採用 **Google Gemini 2.5 Pro** 模型，模擬了一個完整的軟體開發團隊，能夠自動化執行從需求分析、架構設計、資料庫建模、程式碼撰寫、**單元測試撰寫**到**編譯與測試驗證**的全流程任務。
 
-## 🌟 功能特色
+## 🌟 核心特色 (Features)
 
-*   **完整團隊協作**: 包含 Supervisor, System_Designer, DBA, Programmer, Second_Programmer, **Tester**, Researcher 與 QA 等 8 個專業角色。
+*   **完整團隊協作**: 包含 Supervisor (PM), System_Designer (架構師), DBA, Programmer (開發者), Second_Programmer (除錯者), **Tester** (測試工程師), Researcher (技術顧問) 與 QA (品質保證) 等 8 個專業角色。
 *   **Gemini 2.5 Pro 驅動**: 預設使用 Google 最新模型，提供強大的推理、程式碼生成與跨代理人對話能力。
-*   **自動化測試驗證**: 新增 **Tester** 角色負責撰寫 xUnit 測試，**QA** 則強制執行 `dotnet build` 與 `dotnet test` 確保品質。
-*   **深度除錯機制**: **Researcher** 具備聯網搜尋能力，當編譯失敗重複發生時，會自動翻頁搜尋最多 200 筆相關資料以提供精確解法。
-*   **自定義工具攔截器 (Interceptor)**: 基於文本協議的工具系統，穩定執行 `WriteFile`, `ReadFile`, `ListFiles` 與 `RunShellCommand`。
-*   **智慧對話壓縮**: 透過 `SummarizingSelectionStrategy` 確保長對話下的 Token 效率，並精確保留身份標籤與關鍵字（如 `QA_PASSED`, `APPROVED`）。
+*   **自動化測試驗證**: 新增 **Tester** 角色負責撰寫 xUnit/MSTest 測試，**QA** 則強制執行 `dotnet build` 與 `dotnet test` 確保品質。
+*   **深度除錯機制**: **Researcher** 具備聯網搜尋能力 (Google Search API)，當編譯失敗重複發生時，會自動搜尋解法。
+*   **自定義工具攔截器 (Interceptor)**: 基於文本協議的工具系統，穩定執行檔案讀寫與 Shell 指令。
 *   **嚴謹身份認同**: 所有 Agent 遵循強化的角色認同守則，確保不會發生角色冒充或職責混淆。
 
-## 🚀 快速開始
+---
 
-#### 🔑 如何取得 API Keys:
-1.  **Gemini API Key**: 請前往 [Google AI Studio](https://aistudio.google.com/) 建立。
-2.  **Google Custom Search API Key**: 請前往 [Google Programmable Search Engine](https://developers.google.com/custom-search/v1/overview) 點擊 "Get a key"。
-3.  **Google Search Engine ID (CX)**: 請前往 [Control Panel](https://programmablesearchengine.google.com/controlpanel/all) 建立搜尋引擎。
+## 🛠️ 環境需求與準備 (Prerequisites)
 
-## 📁 重要路徑與預設位置 (重要)
+在開始之前，請確保您的環境已安裝以下工具：
 
-為確保系統正常運作，請確認以下檔案與路徑配置：
-
-| 項目 | 預設路徑 / 檔案位置 | 說明 |
-| :--- | :--- | :--- |
-| **設定檔** | `01_Presentation/MyAgentTeam.ConsoleHost/AppSettings.json` | 存放 API Key 與模型設定。若無此檔請參考 `AppSettings.example.json`。 |
-| **共同守則 (高優先)** | `D:\Project\Instructions\Instruction.md` | 系統會優先嘗試從此路徑載入 Agent 共同開發守則。 |
-| **共同守則 (備援)** | `執行檔目錄/Instruction.md` | 若上述路徑不存在，則載入此目錄下的範本。 |
-| **程式碼產出目錄** | `D:\Project\<專案名稱>` | Agent 生成的所有程式碼與測試專案將存放在此。 |
-| **產出目錄 (Fallback)** | `專案目錄/_GeneratedCode` | 若 `D:\` 無法寫入，則會自動回退到此處。 |
-
-> **提示**：若您想更改程式碼產出的磁碟路徑，請修改 `01_Presentation/MyAgentTeam.ConsoleHost/Program.cs` 中的 `baseDrive` 變數。
-
-### 2. 核心組件說明
-
-#### 代理人團隊 (The Team)
-*   **Supervisor**: 專案經理，唯一有權發出 `APPROVED` 指令的決策者。
-*   **System_Designer**: 架構師，負責 SOLID 設計與 Mermaid 圖表，並將文件存於 `docs/architecture/`。
-*   **DBA**: 資料庫專家，專注於 T-SQL 設計與 Dapper 參數化查詢。
-*   **Programmer / Second_Programmer**: 開發者，實作三層式架構，自動處理 NuGet 套件引用。
-*   **Tester**: 自動化測試工程師，負責撰寫 xUnit 單元測試與整合測試。
-*   **QA**: 品質把關者，執行 `dotnet build` 與 `dotnet test`，嚴禁在測試不通過時放行。
-*   **Researcher**: 技術顧問，具備死循環偵測機制，負責解決技術難題。
-
-#### 工具呼叫規範 (Tool Protocol)
-*   **檔案操作**: `file_system.WriteFile(relativePath='...', content='''...''')`
-*   **指令執行**: `shell.RunShellCommand(command='...')` (支援 `en-US` 輸出與 Exit Code 捕獲)
-*   **深度搜尋**: `research.Search(query='...', count=10, startIndex=1)`
-
-### 3. 執行專案
-
-1.  確認已安裝 **.NET 10 SDK**。
-2.  執行專案：
-    ```bash
-    dotnet run --project 01_Presentation/MyAgentTeam.ConsoleHost/MyAgentTeam.ConsoleHost.csproj
-    ```
-3.  **預設設定**: 產生的 Web API 專案預設啟動路徑為 `/swagger`。
-
-## 📂 專案結構
-
-*   **01_Presentation**: 控制台進入點，包含顏色標記輸出與測試模式。
-*   **02_Application**: 定義核心介面 (`IAgentOrchestrator`) 與回應模型。
-*   **03_Infrastructure**:
-    *   `Agents/`: 代理人定義、身份認同守則與選擇策略。
-    *   `Plugins/`: 包含檔案系統、Shell 執行、Google 搜尋與 429 重試處理器。
-    *   `Strategies/`: 包含對話歷史壓縮與失敗終止條件 (`PROJECT_FAILED`)。
-
-## 🛠️ 開發規範
-
-本專案所有程式碼均附帶 **XML 格式的繁體中文註解**。
-系統預設會從 `D:\Project\Instructions\Instruction.md` 或執行目錄載入共同守則。您可以修改守則來調整 Agent 的程式碼風格、命名規範與 NuGet 版本。
+1.  **[.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)** (或最新預覽版)。
+2.  **Google Gemini API Key**: 前往 [Google AI Studio](https://aistudio.google.com/) 申請。
+3.  **Google Custom Search API Key** (選用，若需聯網搜尋功能): 前往 [Google Programmable Search Engine](https://developers.google.com/custom-search/v1/overview) 申請。
+4.  **Google Search Engine ID (CX)** (選用): 前往 [Control Panel](https://programmablesearchengine.google.com/controlpanel/all) 建立搜尋引擎。
 
 ---
+
+## ⚙️ 設定指南 (Configuration)
+
+### 1. 設定 API Keys
+
+請修改 `01_Presentation/MyAgentTeam.ConsoleHost/AppSettings.json` 檔案。若檔案不存在，請參考 `AppSettings.example.json` 建立。
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "Google": {
+    "ApiKey": "YOUR_GEMINI_API_KEY",      // 填入您的 Gemini API Key
+    "ModelId": "gemini-2.5-pro"            // 預設模型
+  },
+  "GoogleSearch": {
+    "ApiKey": "YOUR_GOOGLE_SEARCH_API_KEY", // (選用) 用於 Researcher 聯網搜尋
+    "SearchEngineId": "YOUR_CX_ID"          // (選用) Google 搜尋引擎 ID
+  }
+}
+```
+
+### 2. 自定義開發規範 (Instruction.md)
+
+系統預設會依照以下順序載入 Agent 的共同開發守則 (包含命名規範、架構分層、SQL 風格等)：
+
+1.  **全域設定**: `D:\Project\Instructions\Instruction.md` (若存在，最優先載入)
+2.  **專案預設**: `01_Presentation/MyAgentTeam.ConsoleHost/Instruction.md` (與執行檔同目錄)
+
+您可以在此 Markdown 檔案中自定義：
+*   C# 程式碼風格 (縮排、括號位置)。
+*   命名規則 (PascalCase, camelCase)。
+*   分層架構職責定義 (Controller, Service, Repository)。
+*   SQL 與 Dapper 使用規範。
+
+---
+
+## 🚀 操作指南 (Operation Guide)
+
+### 步驟 1: 啟動專案
+
+進入專案根目錄，執行以下指令啟動 Console Host：
+
+```bash
+dotnet run --project 01_Presentation/MyAgentTeam.ConsoleHost/MyAgentTeam.ConsoleHost.csproj
+```
+
+### 步驟 2: 選擇操作模式
+
+系統啟動後，會詢問您要進行的操作：
+
+#### 模式 1: 建立新專案 (Create New Project)
+1.  **輸入專案名稱**: 系統將在 `D:\Project\<專案名稱>` (或使用者目錄下的 `_GeneratedProjects`) 建立新資料夾。
+2.  **定義需求**:
+    *   **手動輸入**: 直接打字告訴 Supervisor 您想做的專案 (例如：「幫我寫一個貪食蛇遊戲」)。
+    *   **讀取規格文件**: 輸入 `Specification.md` 的路徑，系統會讀取該檔案內容作為需求。
+    *   **系統測試**: 選擇此選項會執行內建的寫入測試 (Hello World)。
+
+#### 模式 2: 開啟既有專案 (Open Existing Project)
+1.  **輸入專案路徑**: 貼上您硬碟中既有專案的完整路徑 (例如 `D:\Project\MyOldApp`)。
+2.  **定義修改需求**:
+    *   告訴 Agent 您想新增的功能或修改的 Bug (例如：「在 BookService 新增 GetByAuthor 方法」)。
+    *   Agent 會自動分析現有的檔案結構與程式碼，並進行增量修改。
+
+### 步驟 3: 觀察 Agent 協作
+
+系統會顯示各個 Agent 的對話與思考過程：
+*   **Supervisor**: 分析需求並指派任務。
+*   **System_Designer**: 規劃架構並產出 `ArchitecturePlan.md`。
+*   **Programmer**: 撰寫程式碼。
+*   **Tester**: 撰寫測試案例。
+*   **QA**: 執行 `dotnet build` 與 `dotnet test` 驗證。
+
+當看到 `QA: QA_PASSED` 與 `Supervisor: APPROVED` 時，表示任務已完成。
+
+---
+
+## 📝 需求文件範本 (Specification.md)
+
+若您的需求較為複雜，建議將其撰寫為 `Specification.md` 檔案，讓 Agent 一次讀取。範本如下：
+
+```markdown
+# 圖書館書籍管理系統 API 規格書
+
+## 1. 專案概述
+建立一個基於 .NET 10 的 Web API，提供書籍 CRUD 功能。
+
+## 2. 資料模型 (Book)
+- Id (int, PK)
+- Title (string)
+- Author (string)
+- Price (decimal)
+
+## 3. API 需求
+- GET /api/books (分頁查詢)
+- POST /api/books (新增書籍)
+```
+
+---
+
+## 📂 專案結構說明
+
+*   **01_Presentation**:
+    *   `MyAgentTeam.ConsoleHost`: 程式進入點，包含 `ConsoleWorkflow.cs` (使用者互動流程) 與 `Program.cs` (依賴注入配置)。
+*   **02_Application**:
+    *   定義核心介面 `IAgentOrchestrator` 與資料模型。
+*   **03_Infrastructure**:
+    *   `Agents/`: 定義所有 Agent 的 Prompt 與職責 (`AgentDefinitions.cs`)。
+    *   `Plugins/`: 實作檔案系統 (`FileSystemPlugin`)、Shell 指令執行 (`ShellPlugin`) 與 Google 搜尋 (`ResearchPlugin`)。
+    *   `Services/`: 實作 Agent 協作邏輯 (`AgentOrchestrator`)。
+
+---
+
+## ⚠️ 常見問題與解決
+
+1.  **找不到路徑**: 請確認您的 `D:\Project` 資料夾是否存在，或檢查程式輸出的預設路徑。
+2.  **API Key 錯誤**: 若出現 401/403 錯誤，請檢查 `AppSettings.json` 中的 Key 是否正確且有額度。
+3.  **編譯失敗**: Agent 雖然會自我修正，但若迴圈過多次，請檢查是否缺少系統層級的依賴 (如特定 .NET SDK 版本)。

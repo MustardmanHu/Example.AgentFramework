@@ -6,7 +6,6 @@
     <Project Path="02_Application/MyAgentTeam.Core/MyAgentTeam.Core.csproj" />
   </Folder>
   <Folder Name="/03_Infrastructure/">
-    <Project Path="03_Infrastructure/MyAgentTeam.Infrastructure.Tests/MyAgentTeam.Infrastructure.Tests.csproj" />
     <Project Path="03_Infrastructure/MyAgentTeam.Infrastructure/MyAgentTeam.Infrastructure.csproj" />
     <Project Path="03_Infrastructure/MyAgentTeam.Infrastructure.Tests/MyAgentTeam.Infrastructure.Tests.csproj" />
   </Folder>
