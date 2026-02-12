@@ -16,14 +16,14 @@ public partial class AgentOrchestrator(Kernel kernel) : IAgentOrchestrator
         string sharedInstructions = await LoadInstructionsAsync();
 
         // 1. 建立 Agent
-        var supervisor = AgentDefinitions.CreateSupervisor(kernel, sharedInstructions, isNewProject);
-        var designer = AgentDefinitions.CreateDesigner(kernel, sharedInstructions, isNewProject);
-        var dba = AgentDefinitions.CreateDBA(kernel, sharedInstructions, isNewProject);
-        var programmer = AgentDefinitions.CreateProgrammer(kernel, sharedInstructions, isNewProject);
-        var secondProgrammer = AgentDefinitions.CreateProgrammerSecond(kernel, sharedInstructions, isNewProject);
-        var researcher = AgentDefinitions.CreateResearcher(kernel, sharedInstructions, isNewProject);
-        var tester = AgentDefinitions.CreateTester(kernel, sharedInstructions, isNewProject);
-        var qa = AgentDefinitions.CreateQA(kernel, sharedInstructions, isNewProject);
+        var supervisor = AgentDefinitions.CreateSupervisor(kernel, sharedInstructions);
+        var designer = AgentDefinitions.CreateDesigner(kernel, sharedInstructions);
+        var dba = AgentDefinitions.CreateDBA(kernel, sharedInstructions);
+        var programmer = AgentDefinitions.CreateProgrammer(kernel, sharedInstructions);
+        var secondProgrammer = AgentDefinitions.CreateProgrammerSecond(kernel, sharedInstructions);
+        var researcher = AgentDefinitions.CreateResearcher(kernel, sharedInstructions);
+        var tester = AgentDefinitions.CreateTester(kernel, sharedInstructions);
+        var qa = AgentDefinitions.CreateQA(kernel, sharedInstructions);
 
         // 2. 準備 Agent 列表以便存取
         var agents = new Agent[] { supervisor, designer, dba, researcher, programmer, secondProgrammer, tester, qa };
