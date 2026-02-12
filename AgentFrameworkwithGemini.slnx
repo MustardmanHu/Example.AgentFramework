@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/01_Presentation/">
+    <Project Path="01_Presentation/MyAgentTeam.ConsoleHost/MyAgentTeam.ConsoleHost.csproj" />
+  </Folder>
+  <Folder Name="/02_Application/">
+    <Project Path="02_Application/MyAgentTeam.Core/MyAgentTeam.Core.csproj" />
+  </Folder>
+  <Folder Name="/03_Infrastructure/">
+    <Project Path="03_Infrastructure/MyAgentTeam.Infrastructure/MyAgentTeam.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+</Solution>
