@@ -31,10 +31,17 @@ public class ShellPlugin
     {
         try
         {
+            var (fileName, arguments) = ParseCommand(command);
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return "Error: Empty command.";
+            }
+
             var processInfo = new ProcessStartInfo
             {
-                FileName = "/bin/bash", // Linux 環境通常使用 bash
-                Arguments = $"-c \"{command}\"",
+                FileName = fileName,
+                Arguments = arguments,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -47,15 +54,6 @@ public class ShellPlugin
             // 強制 UTF-8 編碼 (針對某些 Console 環境)
             processInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
             processInfo.StandardErrorEncoding = System.Text.Encoding.UTF8;
-
-            // Windows 環境相容性調整
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                processInfo.FileName = "cmd.exe";
-                // 使用 chcp 65001 強制 UTF-8 頁碼，但這需要 cmd /c 串接
-                // 為了簡化，依賴 EnvironmentVariables 控制 dotnet 輸出英文通常足夠
-                processInfo.Arguments = $"/C {command}";
-            }
 
             using var process = new Process { StartInfo = processInfo };
             process.Start();
@@ -80,5 +78,51 @@ public class ShellPlugin
         {
             return $"Exception: {ex.Message}";
         }
+    }
+
+    /// <summary>
+    /// 解析指令字串，分離執行檔與參數。
+    /// 支援雙引號 " 與單引號 ' 包裹執行檔路徑。
+    /// </summary>
+    private static (string FileName, string Arguments) ParseCommand(string command)
+    {
+        command = command.Trim();
+        if (string.IsNullOrEmpty(command))
+        {
+            return (string.Empty, string.Empty);
+        }
+
+        // 處理引號包裹的執行檔路徑 (e.g. "C:\Program Files\App.exe")
+        if (command.StartsWith('"'))
+        {
+            int endQuote = command.IndexOf('"', 1);
+            if (endQuote != -1)
+            {
+                string fileName = command.Substring(1, endQuote - 1);
+                string args = command.Substring(endQuote + 1).Trim();
+                return (fileName, args);
+            }
+        }
+
+        // 處理單引號包裹 (Linux 風格)
+        if (command.StartsWith('\''))
+        {
+            int endQuote = command.IndexOf('\'', 1);
+            if (endQuote != -1)
+            {
+                string fileName = command.Substring(1, endQuote - 1);
+                string args = command.Substring(endQuote + 1).Trim();
+                return (fileName, args);
+            }
+        }
+
+        // 預設以空白分隔
+        int firstSpace = command.IndexOf(' ');
+        if (firstSpace == -1)
+        {
+            return (command, string.Empty);
+        }
+
+        return (command.Substring(0, firstSpace), command.Substring(firstSpace + 1).Trim());
     }
 }
