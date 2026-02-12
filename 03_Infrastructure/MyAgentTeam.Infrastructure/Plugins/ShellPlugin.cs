@@ -26,15 +26,22 @@ public class ShellPlugin
     /// <param name="command">要執行的指令。</param>
     /// <returns>指令執行結果 (包含 stdout, stderr 和 Exit Code)。</returns>
     [KernelFunction, Description("執行 Shell 指令 (如 dotnet build)")]
-    public string RunShellCommand(
+    public async Task<string> RunShellCommand(
         [Description("要執行的指令")] string command)
     {
         try
         {
+            var (fileName, arguments) = ParseCommand(command);
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return "Error: Empty command.";
+            }
+
             var processInfo = new ProcessStartInfo
             {
-                FileName = "/bin/bash", // Linux 環境通常使用 bash
-                Arguments = $"-c \"{command}\"",
+                FileName = fileName,
+                Arguments = arguments,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -48,29 +55,36 @@ public class ShellPlugin
             processInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
             processInfo.StandardErrorEncoding = System.Text.Encoding.UTF8;
 
-            // Windows 環境相容性調整
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                processInfo.FileName = "cmd.exe";
-                // 使用 chcp 65001 強制 UTF-8 頁碼，但這需要 cmd /c 串接
-                // 為了簡化，依賴 EnvironmentVariables 控制 dotnet 輸出英文通常足夠
-                processInfo.Arguments = $"/C {command}";
-            }
-
             using var process = new Process { StartInfo = processInfo };
             process.Start();
 
-            // 避免 Deadlock: 先讀取串流，再等待結束
-            string output = process.StandardOutput.ReadToEnd();
-            string error = process.StandardError.ReadToEnd();
-            
-            bool exited = process.WaitForExit(60000); // 延長至 60 秒，編譯可能較久
+            // 使用 Task.WhenAll 平行讀取 stdout 和 stderr 以避免 Deadlock
+            var outputTask = process.StandardOutput.ReadToEndAsync();
+            var errorTask = process.StandardError.ReadToEndAsync();
 
-            if (!exited)
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60)); // 延長至 60 秒，編譯可能較久
+                await process.WaitForExitAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
             {
                 process.Kill();
-                return $"Error: Process timed out (60s).\nOutput so far:\n{output}";
+                string outputSoFar = string.Empty;
+                try
+                {
+                    // 嘗試讀取已有的輸出
+                    outputSoFar = await outputTask.WaitAsync(TimeSpan.FromMilliseconds(500));
+                }
+                catch
+                {
+                    // 忽略讀取失敗
+                }
+                return $"Error: Process timed out (60s).\nOutput so far:\n{outputSoFar}";
             }
+
+            string output = await outputTask;
+            string error = await errorTask;
 
             // 組合最終結果，強制附上 Exit Code
             string result = $"\n=== COMMAND OUTPUT ===\n{output}\n{error}\n\n[Exit Code]: {process.ExitCode}";
@@ -80,5 +94,51 @@ public class ShellPlugin
         {
             return $"Exception: {ex.Message}";
         }
+    }
+
+    /// <summary>
+    /// 解析指令字串，分離執行檔與參數。
+    /// 支援雙引號 " 與單引號 ' 包裹執行檔路徑。
+    /// </summary>
+    private static (string FileName, string Arguments) ParseCommand(string command)
+    {
+        command = command.Trim();
+        if (string.IsNullOrEmpty(command))
+        {
+            return (string.Empty, string.Empty);
+        }
+
+        // 處理引號包裹的執行檔路徑 (e.g. "C:\Program Files\App.exe")
+        if (command.StartsWith('"'))
+        {
+            int endQuote = command.IndexOf('"', 1);
+            if (endQuote != -1)
+            {
+                string fileName = command.Substring(1, endQuote - 1);
+                string args = command.Substring(endQuote + 1).Trim();
+                return (fileName, args);
+            }
+        }
+
+        // 處理單引號包裹 (Linux 風格)
+        if (command.StartsWith('\''))
+        {
+            int endQuote = command.IndexOf('\'', 1);
+            if (endQuote != -1)
+            {
+                string fileName = command.Substring(1, endQuote - 1);
+                string args = command.Substring(endQuote + 1).Trim();
+                return (fileName, args);
+            }
+        }
+
+        // 預設以空白分隔
+        int firstSpace = command.IndexOf(' ');
+        if (firstSpace == -1)
+        {
+            return (command, string.Empty);
+        }
+
+        return (command.Substring(0, firstSpace), command.Substring(firstSpace + 1).Trim());
     }
 }

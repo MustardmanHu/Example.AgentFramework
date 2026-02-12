@@ -6,7 +6,9 @@ using Microsoft.Agents.AI;
 
 internal class Program
 {
-    private static readonly string apiKey = "AIzaSyDcnGw_yxuu07tZqvxgGmTEvIFs0Y3sVuY";
+    private static readonly string apiKey = Environment.GetEnvironmentVariable("GOOGLE_API_KEY") ??
+        throw new InvalidOperationException("API Key not found. Please set the GOOGLE_API_KEY environment variable.");
+
     private static void Main(string[] args)
     {
         var client = new GenerativeAIChatClient(apiKey: apiKey, modelName: GoogleAIModels.GeminiProLatest);
@@ -48,6 +50,6 @@ internal class Program
                 researcherAgent
             ],
             Topic = args
-        }
+        };
     }
 }
