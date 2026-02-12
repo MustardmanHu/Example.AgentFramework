@@ -5,6 +5,8 @@ using MyAgentTeam.Infrastructure.Agents;
 
 namespace MyAgentTeam.Infrastructure.Tests;
 
+#pragma warning disable SKEXP0070
+
 [TestClass]
 public class AgentDefinitionsTests
 {
@@ -21,10 +23,9 @@ public class AgentDefinitionsTests
 	{
 		// Arrange
 		string sharedInstructions = "Shared instructions";
-		bool isNewProject = false;
 
 		// Act
-		var agent = AgentDefinitions.CreateSupervisor(_kernel, sharedInstructions, isNewProject);
+		var agent = AgentDefinitions.CreateSupervisor(_kernel, sharedInstructions);
 
 		// Assert
 		Assert.AreEqual("Supervisor", agent.Name);
@@ -37,10 +38,9 @@ public class AgentDefinitionsTests
 	{
 		// Arrange
 		string sharedInstructions = "Shared instructions";
-		bool isNewProject = false;
 
 		// Act
-		var agent = AgentDefinitions.CreateDesigner(_kernel, sharedInstructions, isNewProject);
+		var agent = AgentDefinitions.CreateDesigner(_kernel, sharedInstructions);
 
 		// Assert
 		Assert.AreEqual("System_Designer", agent.Name);
@@ -53,10 +53,9 @@ public class AgentDefinitionsTests
 	{
 		// Arrange
 		string sharedInstructions = "Shared instructions";
-		bool isNewProject = false;
 
 		// Act
-		var agent = AgentDefinitions.CreateProgrammer(_kernel, sharedInstructions, isNewProject);
+		var agent = AgentDefinitions.CreateProgrammer(_kernel, sharedInstructions);
 
 		// Assert
 		Assert.AreEqual("Programmer", agent.Name);
@@ -69,10 +68,9 @@ public class AgentDefinitionsTests
 	{
 		// Arrange
 		string sharedInstructions = "Shared instructions";
-		bool isNewProject = false;
 
 		// Act
-		var agent = AgentDefinitions.CreateDBA(_kernel, sharedInstructions, isNewProject);
+		var agent = AgentDefinitions.CreateDBA(_kernel, sharedInstructions);
 
 		// Assert
 		Assert.AreEqual("DBA", agent.Name);
@@ -85,10 +83,9 @@ public class AgentDefinitionsTests
 	{
 		// Arrange
 		string sharedInstructions = "Shared instructions";
-		bool isNewProject = false;
 
 		// Act
-		var agent = AgentDefinitions.CreateProgrammerSecond(_kernel, sharedInstructions, isNewProject);
+		var agent = AgentDefinitions.CreateProgrammerSecond(_kernel, sharedInstructions);
 
 		// Assert
 		Assert.AreEqual("Second_Programmer", agent.Name);
@@ -101,10 +98,9 @@ public class AgentDefinitionsTests
 	{
 		// Arrange
 		string sharedInstructions = "Shared instructions";
-		bool isNewProject = false;
 
 		// Act
-		var agent = AgentDefinitions.CreateResearcher(_kernel, sharedInstructions, isNewProject);
+		var agent = AgentDefinitions.CreateResearcher(_kernel, sharedInstructions);
 
 		// Assert
 		Assert.AreEqual("Researcher", agent.Name);
@@ -117,10 +113,9 @@ public class AgentDefinitionsTests
 	{
 		// Arrange
 		string sharedInstructions = "Shared instructions";
-		bool isNewProject = false;
 
 		// Act
-		var agent = AgentDefinitions.CreateTester(_kernel, sharedInstructions, isNewProject);
+		var agent = AgentDefinitions.CreateTester(_kernel, sharedInstructions);
 
 		// Assert
 		Assert.AreEqual("Tester", agent.Name);
@@ -133,10 +128,9 @@ public class AgentDefinitionsTests
 	{
 		// Arrange
 		string sharedInstructions = "Shared instructions";
-		bool isNewProject = false;
 
 		// Act
-		var agent = AgentDefinitions.CreateQA(_kernel, sharedInstructions, isNewProject);
+		var agent = AgentDefinitions.CreateQA(_kernel, sharedInstructions);
 
 		// Assert
 		Assert.AreEqual("QA", agent.Name);
